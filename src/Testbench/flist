@@ -9,3 +9,6 @@ tb_Seven_Segment_Display.v
 ../Seven_Segment_Display.v
 ../Pipelined_Divider.v
 ../Measurement_Processor.v
+../hex8_2.v
+../hex8_test.v
+../hex8.v

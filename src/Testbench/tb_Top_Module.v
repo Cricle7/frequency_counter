@@ -8,28 +8,19 @@ module tb_Top_Module;
 
     // 信号声明
     reg clk;
-    reg rst;
+    reg rst_n;
     reg signal_in;
-    reg [31:0] clock_freq;
-    wire [6:0] seg_freq;
-    wire [2:0] an_freq;
-    wire [6:0] seg_period;
-    wire [2:0] an_period;
-    wire [6:0] seg_pulse;
-    wire [2:0] an_pulse;
-
+    wire rclk;
+    wire sclk;
+    wire dio;  
     // 实例化顶层模块
     Top_Module uut (
         .clk(clk),
-        .rst(rst),
+        .rst_n(rst),
         .signal_in(signal_in),
-        .clock_freq(clock_freq),
-        .seg_freq(seg_freq),
-        .an_freq(an_freq),
-        .seg_period(seg_period),
-        .an_period(an_period),
-        .seg_pulse(seg_pulse),
-        .an_pulse(an_pulse)
+        .rclk(rclk),
+        .sclk(sclk),
+        .dio(dio)
     );
 
     // 时钟生成
@@ -41,11 +32,10 @@ module tb_Top_Module;
     // 输入信号生成
     initial begin
         // 初始化信号
-        rst = 1;
-        signal_in = 0;
-        clock_freq = CLOCK_FREQ;
-        #100; // 100ns 复位
         rst = 0;
+        signal_in = 0;
+        #100; // 100ns 复位
+        rst = 1;
 
         // 等待一段时间后开始信号生成
         #1000;
@@ -81,13 +71,6 @@ module tb_Top_Module;
         // 结束仿真
         #100000000;
         $stop;
-    end
-
-    // 监视数码管显示（仿真时打印信号状态）
-    // 注意：在实际 FPGA 中，数码管的显示需要通过硬件观察，这里仅为仿真打印。
-    initial begin
-        $monitor("Time: %0t | Seg_Freq: %b | Seg_Period: %b | Seg_Pulse: %b | AN_Freq: %b | AN_Period: %b | AN_Pulse: %b",
-                 $time, seg_freq, seg_period, seg_pulse, an_freq, an_period, an_pulse);
     end
 
 endmodule

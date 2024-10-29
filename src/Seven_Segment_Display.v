@@ -60,7 +60,7 @@ module Seven_Segment_Display #(
     endfunction
 
     // 扫描计数器和扫描状态更新
-    always @(posedge clk or posedge rst) begin
+    always @(posedge clk) begin
         if (rst) begin
             scan_counter <= 0;
             scan_state <= 0;
@@ -141,7 +141,7 @@ module Seven_Segment_Display #(
         .Reset_n(!rst),
         //.S_EN(scan_counter == 0 && scan_state == 0), // 每次扫描周期开始时发送数据
         .S_EN(1), // 每次扫描周期开始时发送数据
-        .Data({hex_sel, segments}),        // 高8位为位选，低8位为段选
+        .Data({segments,hex_sel}),        // 高8位为位选，低8位为段选
         .DS(dio),
         .ST_CP(rclk),
         .SH_CP(sclk)

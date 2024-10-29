@@ -1,14 +1,23 @@
-module HC595_Driver #(
-    parameter CNT_MAX = 2
-)(
-    input Clk,
-    input Reset_n,
-    input [15:0]Data,
-    input S_EN,
-    output reg SH_CP,
-    output reg ST_CP,
-    output reg DS
+`timescale 1ns / 1ps
+
+module HC595_Driver(
+    Clk,
+    Reset_n,
+    Data,
+    S_EN,
+    SH_CP,
+    ST_CP,
+    DS
 );
+    
+    input Clk;
+    input Reset_n;
+    input [15:0]Data;
+    input S_EN;
+    output reg SH_CP;
+    output reg ST_CP;
+    output reg DS;
+    parameter CNT_MAX = 2;
     
     reg [15:0]r_data;
     always@(posedge Clk)
