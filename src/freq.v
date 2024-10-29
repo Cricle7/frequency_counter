@@ -46,6 +46,7 @@ module Input_Capture_Module (
     input wire signal_in,            // 待测量的输入信号
     output reg [31:0] high_time,     // 高电平时间 (以系统时钟周期为单位)
     output reg [31:0] low_time,      // 低电平时间 (以系统时钟周期为单位)
+    output reg [31:0] period_time,      // 周期时间 (以系统时钟周期为单位)
     output reg measurement_done      // 测量完成信号
 );
 
@@ -189,82 +190,6 @@ module Input_Capture_Module (
                 else begin
                     counter <= counter + 1;
                 end
-            end
-        end
-    end
-
-endmodule
-module Pipelined_Divider (
-    input wire clk,
-    input wire rst,
-    input wire start,                 // 开始除法操作
-    input wire [31:0] dividend,       // 被除数
-    input wire [31:0] divisor,        // 除数
-    output reg [31:0] quotient,       // 商
-    output reg [31:0] remainder,      // 余数
-    output reg ready                  // 除法结果就绪
-);
-
-    // 定义流水阶段的寄存器
-    reg [31:0] dividend_reg [0:3];
-    reg [31:0] divisor_reg [0:3];
-    reg [31:0] quotient_reg [0:3];
-    reg [31:0] remainder_reg [0:3];
-    reg start_reg [0:3];
-    
-    integer i;
-    
-    // 每个时钟周期推进一个流水阶段
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
-            for (i = 0; i < 4; i = i + 1) begin
-                dividend_reg[i] <= 0;
-                divisor_reg[i] <= 0;
-                quotient_reg[i] <= 0;
-                remainder_reg[i] <= 0;
-                start_reg[i] <= 0;
-            end
-            quotient <= 0;
-            remainder <= 0;
-            ready <= 0;
-        end
-        else begin
-            // 第一个阶段接收输入
-            if (start) begin
-                dividend_reg[0] <= dividend;
-                divisor_reg[0] <= divisor;
-                quotient_reg[0] <= 0;
-                remainder_reg[0] <= 0;
-                start_reg[0] <= 1;
-            end
-            else begin
-                start_reg[0] <= 0;
-            end
-            
-            // 后续阶段传递数据
-            for (i = 1; i < 4; i = i + 1) begin
-                dividend_reg[i] <= dividend_reg[i-1];
-                divisor_reg[i] <= divisor_reg[i-1];
-                quotient_reg[i] <= quotient_reg[i-1];
-                remainder_reg[i] <= remainder_reg[i-1];
-                start_reg[i] <= start_reg[i-1];
-            end
-            
-            // 模拟除法操作（这里只是一个占位，实际应用中需要实现真实的除法逻辑）
-            // 这里只在最后一个阶段输出结果
-            if (start_reg[3]) begin
-                if (divisor_reg[3] != 0) begin
-                    quotient <= dividend_reg[3] / divisor_reg[3];
-                    remainder <= dividend_reg[3] % divisor_reg[3];
-                end
-                else begin
-                    quotient <= 32'hFFFFFFFF; // 除以零时商为最大值
-                    remainder <= dividend_reg[3];
-                end
-                ready <= 1;
-            end
-            else begin
-                ready <= 0;
             end
         end
     end

@@ -5,3 +5,4 @@ tb_Top_Module.v
 ../top.v
 ../Binary_to_BCD.v
 ../Seven_Segment_Display.v
+../Pipelined_Divider.v
