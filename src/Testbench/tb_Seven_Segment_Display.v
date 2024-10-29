@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module Seven_Segment_Display_tb;
+module tb_Seven_Segment_Display;
 
     // 参数定义
     parameter CLOCK_FREQ = 50000000;    // 50 MHz
@@ -149,7 +149,7 @@ module Seven_Segment_Display_tb;
     // 可选：记录输出信号到文件
     initial begin
         $dumpfile("Seven_Segment_Display_tb.vcd");
-        $dumpvars(0, Seven_Segment_Display_tb);
+        $dumpvars(0, tb_Seven_Segment_Display);
     end
 
 endmodule

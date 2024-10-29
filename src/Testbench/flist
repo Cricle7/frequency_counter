@@ -3,6 +3,7 @@ tb_Input_Capture_Module.v
 tb_Top_Module.v
 tb_Seven_Segment_Display.v
 ../freq.v
+../HC595_Driver.v
 ../top.v
 ../Binary_to_BCD.v
 ../Seven_Segment_Display.v

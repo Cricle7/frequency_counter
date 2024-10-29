@@ -1,44 +1,44 @@
-module Sampling_Module (
-    input wire clk,              // 系统时钟
-    input wire rst,              // 复位信号，高电平有效
-    input wire sample_enable,    // 采样使能信号
-    input wire [15:0] data_in,   // 输入数据（假设为16位）
-    output reg [15:0] data_out,  // 输出采样数据
-    output reg sample_ready      // 采样完成信号
-);
+//module Sampling_Module (
+    //input wire clk,              // 系统时钟
+    //input wire rst,              // 复位信号，高电平有效
+    //input wire sample_enable,    // 采样使能信号
+    //input wire [15:0] data_in,   // 输入数据（假设为16位）
+    //output reg [15:0] data_out,  // 输出采样数据
+    //output reg sample_ready      // 采样完成信号
+//);
 
-    parameter SAMPLE_RATE = 1000000; // 采样率，例如1MHz
-    parameter CLOCK_FREQ = 50000000; // 时钟频率，例如50MHz
+    //parameter SAMPLE_RATE = 1000000; // 采样率，例如1MHz
+    //parameter CLOCK_FREQ = 50000000; // 时钟频率，例如50MHz
 
-    // 计算分频计数
-    localparam integer COUNT_MAX = CLOCK_FREQ / SAMPLE_RATE;
+    //// 计算分频计数
+    //localparam integer COUNT_MAX = CLOCK_FREQ / SAMPLE_RATE;
 
-    reg [31:0] counter;
+    //reg [31:0] counter;
 
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
-            counter <= 0;
-            data_out <= 0;
-            sample_ready <= 0;
-        end
-        else if (sample_enable) begin
-            if (counter < COUNT_MAX - 1) begin
-                counter <= counter + 1;
-                sample_ready <= 0;
-            end
-            else begin
-                counter <= 0;
-                data_out <= data_in;    // 采样输入数据
-                sample_ready <= 1;      // 采样完成信号置高
-            end
-        end
-        else begin
-            counter <= 0;
-            sample_ready <= 0;
-        end
-    end
+    //always @(posedge clk or posedge rst) begin
+        //if (rst) begin
+            //counter <= 0;
+            //data_out <= 0;
+            //sample_ready <= 0;
+        //end
+        //else if (sample_enable) begin
+            //if (counter < COUNT_MAX - 1) begin
+                //counter <= counter + 1;
+                //sample_ready <= 0;
+            //end
+            //else begin
+                //counter <= 0;
+                //data_out <= data_in;    // 采样输入数据
+                //sample_ready <= 1;      // 采样完成信号置高
+            //end
+        //end
+        //else begin
+            //counter <= 0;
+            //sample_ready <= 0;
+        //end
+    //end
 
-endmodule
+//endmodule
 
 module Input_Capture_Module (
     input wire clk,                  // 系统时钟 (例如 50MHz)

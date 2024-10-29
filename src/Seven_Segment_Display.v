@@ -22,9 +22,9 @@ module Seven_Segment_Display #(
     input wire dp5,                      // 第5位小数点控制
     input wire dp6,                      // 第6位小数点控制
     input wire dp7,                      // 第7位小数点控制
-    output reg dio,                      // 串行数据输出到第一个 SN74HC595 的 SER 引脚
-    output reg rclk,                     // 存储寄存器时钟输出到 SN74HC595 的 RCLK 引脚
-    output reg sclk                      // 移位寄存器时钟输出到 SN74HC595 的 SCLK 引脚
+    output dio,                      // 串行数据输出到第一个 SN74HC595 的 SER 引脚
+    output rclk,                     // 存储寄存器时钟输出到 SN74HC595 的 RCLK 引脚
+    output sclk                      // 移位寄存器时钟输出到 SN74HC595 的 SCLK 引脚
 );
 
     // 计算扫描周期
@@ -135,55 +135,17 @@ module Seven_Segment_Display #(
         endcase
     end
 
-    // 移位寄存器控制逻辑
-    reg [15:0] shift_data;    // 16 位移位数据
-    reg [4:0] shift_counter;  // 移位计数器（0-16）
-    reg shifting;             // 是否正在移位
+    // 实例化 HC595_Driver 模块
+    HC595_Driver hc595_driver_inst (
+        .Clk(clk),
+        .Reset_n(!rst),
+        //.S_EN(scan_counter == 0 && scan_state == 0), // 每次扫描周期开始时发送数据
+        .S_EN(1), // 每次扫描周期开始时发送数据
+        .Data({hex_sel, segments}),        // 高8位为位选，低8位为段选
+        .DS(dio),
+        .ST_CP(rclk),
+        .SH_CP(sclk)
+    );
 
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
-            dio           <= 0;
-            rclk          <= 0;
-            sclk          <= 0;
-            shift_data    <= 16'b0;
-            shift_counter <= 0;
-            shifting      <= 0;
-        end else begin
-            // 在扫描计数器归零时，加载新的移位数据
-            if (scan_counter == 0 && !shifting) begin
-                // 构建移位数据
-                // shift_data[15:8] -> HEX_SEL (8 位)
-                // shift_data[7:0]  -> HEX_A 到 HEX_DP (8 位)
-                shift_data    <= {hex_sel, segments}; // 总共16位
-                shift_counter <= 16;
-                shifting      <= 1;
-                rclk          <= 0;
-            end
-
-            if (shifting) begin
-                if (shift_counter > 0) begin
-                    // 设置 DIO 为最高位
-                    dio <= shift_data[15];
-                    // 产生一个 SCLK 上升沿
-                    sclk <= 1;
-                end else if (shift_counter == 0 && shifting) begin
-                    // 完成移位后，产生 RCLK 上升沿
-                    rclk    <= 1;
-                    shifting <= 0;
-                end
-
-                // 在下一个时钟周期降低 SCLK 并左移数据
-                if (sclk) begin
-                    sclk       <= 0;
-                    shift_data <= shift_data << 1;
-                    shift_counter <= shift_counter - 1;
-                end else if (shift_counter == 0 && rclk) begin
-                    rclk <= 0;
-                end else if (shift_counter > 0 && !sclk) begin
-                    sclk <= 1;
-                end
-            end
-        end
-    end
 
 endmodule // Seven_Segment_Display
