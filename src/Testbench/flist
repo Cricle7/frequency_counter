@@ -6,3 +6,4 @@ tb_Top_Module.v
 ../Binary_to_BCD.v
 ../Seven_Segment_Display.v
 ../Pipelined_Divider.v
+../Measurement_Processor.v

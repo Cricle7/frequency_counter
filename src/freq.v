@@ -46,7 +46,7 @@ module Input_Capture_Module (
     input wire signal_in,            // 待测量的输入信号
     output reg [31:0] high_time,     // 高电平时间 (以系统时钟周期为单位)
     output reg [31:0] low_time,      // 低电平时间 (以系统时钟周期为单位)
-    output reg [31:0] period_time,      // 周期时间 (以系统时钟周期为单位)
+    output wire [31:0] period_time,      // 周期时间 (以系统时钟周期为单位)
     output reg measurement_done      // 测量完成信号
 );
 
@@ -84,6 +84,7 @@ module Input_Capture_Module (
     reg [31:0] high_count;            // 高电平计数
     reg [31:0] low_count;             // 低电平计数
 
+    assign period_time = period_count;
     // 状态转移
     always @(posedge clk or posedge rst) begin
         if (rst) begin
@@ -191,128 +192,6 @@ module Input_Capture_Module (
                     counter <= counter + 1;
                 end
             end
-        end
-    end
-
-endmodule
-
-module Measurement_Processor (
-    input wire clk,                      // 系统时钟
-    input wire rst,                      // 复位信号，高电平有效
-    input wire measurement_done,        // 测量完成信号
-    input wire [31:0] high_time,         // 高电平持续时间
-    input wire [31:0] low_time,          // 低电平持续时间
-    input wire [31:0] clock_freq,        // 外部输入时钟频率 (Hz)
-    output reg [31:0] period,            // 信号周期 (以系统时钟周期为单位)
-    output reg [31:0] frequency_out,     // 计算得到的频率 (Hz)
-    output reg calculation_done          // 计算完成信号
-);
-
-    // 内部信号
-    reg [31:0] period_reg;
-    reg [31:0] clock_freq_reg;
-    reg divider_start;
-    reg [31:0] dividend;
-    reg [31:0] divisor;
-    wire [31:0] quotient;
-    wire [31:0] remainder;
-    wire divider_ready;
-    
-    // 实例化 Pipelined_Divider
-    Pipelined_Divider divider_inst (
-        .clk(clk),
-        .rst(rst),
-        .start(divider_start),
-        .dividend(dividend),
-        .divisor(divisor),
-        .quotient(quotient),
-        .remainder(remainder),
-        .ready(divider_ready)
-    );
-    
-    // 状态机定义
-    reg [1:0] IDLE = 2'd0;
-    reg [1:0] LOAD = 2'd1;
-    reg [1:0] CALCULATE = 2'd2;
-    reg [1:0] OUTPUT = 2'd3;
-    
-    reg [1:0] current_state, next_state;
-    
-    // 状态转移
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
-            current_state <= IDLE;
-        end
-        else begin
-            current_state <= next_state;
-        end
-    end
-    
-    // 状态机逻辑
-    always @(*) begin
-        case (current_state)
-            IDLE: begin
-                if (measurement_done) begin
-                    next_state = LOAD;
-                end
-                else begin
-                    next_state = IDLE;
-                end
-            end
-            LOAD: begin
-                next_state = CALCULATE;
-            end
-            CALCULATE: begin
-                if (divider_ready) begin
-                    next_state = OUTPUT;
-                end
-                else begin
-                    next_state = CALCULATE;
-                end
-            end
-            OUTPUT: begin
-                next_state = IDLE;
-            end
-            default: next_state = IDLE;
-        endcase
-    end
-    
-    // 流水化除法控制和输出逻辑
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
-            period <= 0;
-            frequency_out <= 0;
-            calculation_done <= 0;
-            divider_start <= 0;
-            dividend <= 0;
-            divisor <= 0;
-            clock_freq_reg <= 0;
-        end
-        else begin
-            calculation_done <= 0;
-            case (current_state)
-                IDLE: begin
-                    // 等待 measurement_done 信号
-                end
-                LOAD: begin
-                    // 计算周期
-                    period_reg <= high_time + low_time;
-                    // 准备除法操作
-                    dividend <= clock_freq;          // 被除数: 时钟频率
-                    divisor <= high_time + low_time; // 除数: 信号周期
-                    clock_freq_reg <= clock_freq;    // 记录时钟频率
-                    divider_start <= 1;              // 启动除法
-                end
-                CALCULATE: begin
-                    divider_start <= 0; // 只在 LOAD 阶段触发一次除法
-                end
-                OUTPUT: begin
-                    frequency_out <= quotient;
-                    period <= period_reg;
-                    calculation_done <= 1;
-                end
-                default: ;
-            endcase
         end
     end
 

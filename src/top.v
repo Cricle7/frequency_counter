@@ -41,8 +41,9 @@ module Top_Module (
     output wire [2:0] an_pulse           // 脉宽数码管位选
     );
 
+    parameter CLOCK_FREQ = 50000000;
     // 中间信号
-    wire [31:0] frequency;
+    wire [31:0] period_time;
     wire [31:0] high_time;
     wire [31:0] low_time;
     wire measurement_done_sig;
@@ -68,17 +69,20 @@ module Top_Module (
         .signal_in(signal_in),
         .high_time(high_time),
         .low_time(low_time),
+        .period_time(period_time),
         .measurement_done(measurement_done_sig)
     );
 
     // 实例化 Measurement_Processor
-    Measurement_Processor processor_inst (
+    Measurement_Processor # (
+        .CLOCK_FREQ(CLOCK_FREQ)
+    ) processor(
         .clk(clk),
         .rst(rst),
         .measurement_done(measurement_done_sig),
         .high_time(high_time),
         .low_time(low_time),
-        .clock_freq(clock_freq),
+        .period_time(period_time),
         .period(period),
         .frequency_out(frequency_out),
         .calculation_done(calculation_done)

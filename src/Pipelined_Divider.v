@@ -13,6 +13,8 @@ module Pipelined_Divider (
     reg [31:0] divisor_reg [0:3];
     reg start_reg [0:3];
     
+    reg [31:0] quotient_temp;
+    reg [31:0] remainder_temp;
     integer i;
     
     // 每个时钟周期推进一个流水阶段
@@ -48,8 +50,6 @@ module Pipelined_Divider (
             if (start_reg[3]) begin
                 if (divisor_reg[3] != 0) begin
                     // 临时变量
-                    reg [31:0] quotient_temp;
-                    reg [31:0] remainder_temp;
                     
                     quotient_temp = dividend_reg[3] / divisor_reg[3];
                     
