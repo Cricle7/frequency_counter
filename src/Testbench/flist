@@ -1,0 +1,4 @@
++define+SIMULATION
+tb_Input_Capture_Module.v
+../freq.v
+../top.v
