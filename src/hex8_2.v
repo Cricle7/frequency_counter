@@ -68,30 +68,30 @@ module hex8_2(
 
      always@(posedge Clk)
         case(disp_tmp)
-            0: SEG[6:0] = 8'hc0;
-            1: SEG[6:0] = 8'hf9;
-            2: SEG[6:0] = 8'ha4;
-            3: SEG[6:0] = 8'hb0;
-            4: SEG[6:0] = 8'h99;
-            5: SEG[6:0] = 8'h92;
-            6: SEG[6:0] = 8'h82;
-            7: SEG[6:0] = 8'hf8;
-            8: SEG[6:0] = 8'h80;
-            9: SEG[6:0] = 8'h90;
-            4'ha: SEG[6:0] = 8'h88;
-            4'hb: SEG[6:0] = 8'h83;
-            4'hc: SEG[6:0] = 8'hc6;
-            4'hd: SEG[6:0] = 8'ha1;
-            4'he: SEG[6:0] = 8'h86;
-            4'hf: SEG[6:0] = 8'h8e;
+            0: SEG[6:0] = 7'hc0;
+            1: SEG[6:0] = 7'hf9;
+            2: SEG[6:0] = 7'ha4;
+            3: SEG[6:0] = 7'hb0;
+            4: SEG[6:0] = 7'h99;
+            5: SEG[6:0] = 7'h92;
+            6: SEG[6:0] = 7'h82;
+            7: SEG[6:0] = 7'hf8;
+            8: SEG[6:0] = 7'h80;
+            9: SEG[6:0] = 7'h90;
+            4'ha: SEG[6:0] = 7'h88;
+            4'hb: SEG[6:0] = 7'h83;
+            4'hc: SEG[6:0] = 7'hc6;
+            4'hd: SEG[6:0] = 7'ha1;
+            4'he: SEG[6:0] = 7'h86;
+            4'hf: SEG[6:0] = 7'h8e;
         endcase   
     always @(posedge Clk) begin
         if (num_cnt == point_1) begin
-            SEG[7] <= 1'b1;
-        end if (num_cnt == point_2 + 4) begin
-            SEG[7] <= 1'b1;
-        end else begin
             SEG[7] <= 1'b0;
+        end if (num_cnt == point_2 + 4) begin
+            SEG[7] <= 1'b0;
+        end else begin
+            SEG[7] <= 1'b1;
         end
     end
 endmodule

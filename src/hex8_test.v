@@ -1,18 +1,18 @@
 module hex8_test(
     input Clk,
     input Reset_n,
-    input point_1,
-    input point_2,
+    input [3:0]point_1,
+    input [3:0]point_2,
 
     input [31:0]Disp_Data,
-    //output [7:0]SEL,
-    //output [7:0]SEG,//seg[0]-a,seg[1]-b...seg[7]-h
     
     output SH_CP,
     output ST_CP,
     output DS
 );
-   
+    wire [7:0]SEL;
+    wire [7:0]SEG;//seg[0]-a,seg[1]-b...seg[7]-h
+    
     hex8_2 u_hex8_2(
         Clk,
         Reset_n,

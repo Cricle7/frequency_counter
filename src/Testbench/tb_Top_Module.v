@@ -16,7 +16,7 @@ module tb_Top_Module;
     // 实例化顶层模块
     Top_Module uut (
         .clk(clk),
-        .rst_n(rst),
+        .rst_n(rst_n),
         .signal_in(signal_in),
         .rclk(rclk),
         .sclk(sclk),
@@ -32,10 +32,10 @@ module tb_Top_Module;
     // 输入信号生成
     initial begin
         // 初始化信号
-        rst = 0;
+        rst_n = 0;
         signal_in = 0;
         #100; // 100ns 复位
-        rst = 1;
+        rst_n = 1;
 
         // 等待一段时间后开始信号生成
         #1000;
