@@ -1,4 +1,7 @@
 +define+SIMULATION
 tb_Input_Capture_Module.v
+tb_Top_Module.v
 ../freq.v
 ../top.v
+../Binary_to_BCD.v
+../Seven_Segment_Display.v
