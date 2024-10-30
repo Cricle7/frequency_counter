@@ -32,7 +32,7 @@ module Measurement_Processor #(
         .clk        (clk),
         .rst_n      (rst_n),
         .start      (measurement_done),
-        .numerator  (32'd5000),                // 分子
+        .numerator  (32'd500_000_000),                // 分子
         .divisor    (period_time),             // 分母
         .quotient   (frequency_quotient),      // 商
         .done       (divider_done)             // 完成信号
@@ -94,27 +94,27 @@ module Measurement_Processor #(
 
     always @(*) begin
         Segment_freq = freq_bcd_rounded[19:4];
-        point_1     = 2;
+        point_2     = 2;
         k = 1'b1;
         casez ({freq_ten_tho_0, freq_tho_0, freq_hund_0, freq_tens_0})
             4'b1111: begin
                 Segment_freq = freq_bcd_rounded[15:0];
-                point_1     = 1'b0;
+                point_2     = 1'b0;
                 k = 1'b0;
             end
             4'b111?: begin
-                Segment_freq = freq_bcd_rounded[15:4];
-                point_1     = 1'b0;
+                Segment_freq = freq_bcd_rounded[15:0];
+                point_2     = 1'b0;
                 k = 1'b0;
             end
             4'b11??: begin
-                Segment_freq = freq_bcd_rounded[15:4];
-                point_1     = 1'b0;
+                Segment_freq = freq_bcd_rounded[15:0];
+                point_2     = 1'b0;
                 k = 1'b0;
             end
             4'b1???: begin
-                Segment_freq = freq_bcd_rounded[15:4];
-                point_1     = 3;
+                Segment_freq = freq_bcd_rounded[15:0];
+                point_2     = 3;
             end
         endcase
     end
@@ -126,27 +126,27 @@ module Measurement_Processor #(
 
     always @(*) begin
         Segment_period = period_bcd_rounded[19:4];
-        point_2     = 2;
-        k = 1'b1;
+        point_1     = 2;
+        m = 1'b1;
         casez ({period_ten_tho_0, period_tho_0, period_hund_0, period_tens_0})
             4'b1111: begin
                 Segment_period = period_bcd_rounded[15:0];
-                point_2     = 1'b0;
-                k = 1'b0;
+                point_1     = 1'b0;
+                m = 1'b0;
             end
             4'b111?: begin
-                Segment_period = period_bcd_rounded[15:4];
-                point_2     = 1'b0;
-                k = 1'b0;
+                Segment_period = period_bcd_rounded[15:0];
+                point_1     = 1'b0;
+                m = 1'b0;
             end
             4'b11??: begin
-                Segment_period = period_bcd_rounded[15:4];
-                point_2     = 1'b0;
-                k = 1'b0;
+                Segment_period = period_bcd_rounded[15:0];
+                point_1     = 1'b0;
+                m = 1'b0;
             end
             4'b1???: begin
-                Segment_period = period_bcd_rounded[15:4];
-                point_2     = 3;
+                Segment_period = period_bcd_rounded[15:0];
+                point_1     = 3;
             end
         endcase
     end

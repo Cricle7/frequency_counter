@@ -2,7 +2,7 @@ vlib work
 vlog -f flist
 
 #Load the design.
-vsim -t ps +notimingchecks -gui -voptargs="+acc" work.tb_Binary_to_BCD
+vsim -t ps +notimingchecks -gui -voptargs="+acc" work.tb_Top_Module
 # add wave -position insertpoint sim:/tb_Top_Module/uut/*
 # add wave -position insertpoint sim:/tb_Top_Module/uut/capture_inst/*
 # add wave -position insertpoint sim:/tb_Top_Module/uut/processor/*

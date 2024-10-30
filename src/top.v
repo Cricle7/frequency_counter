@@ -34,56 +34,38 @@ module Top_Module (
     input wire mod_sel,                   // 按键
     output              rclk,
     output              sclk,
-    output              dio
+    output              dio,
+    output              k,
+    output              m
     );
 
     parameter CLOCK_FREQ = 50000000;
     parameter SCAN_FREQ  = 1000;
     // 中间信号
     wire [31:0] period_time;
+    wire [31:0] Measurement_time;
     wire [31:0] high_time;
     wire [31:0] low_time;
     wire measurement_done_sig;
 
-    wire [31:0] period;
-    wire [31:0] frequency_out;
-    wire calculation_done;
-
-    // BCD转换器输出
-    wire [3:0] freq_hundreds, freq_tens, freq_units;
-    wire [3:0] period_hundreds, period_tens, period_units;
-    wire [3:0] pulse_hundreds, pulse_tens, pulse_units;
-
-    wire bcd_freq_done, bcd_period_done, bcd_pulse_done;
-    wire [3:0]digit0 = 0;
-    wire [3:0]digit1 = 1;
-    wire [3:0]digit2 = 2;
-    wire [3:0]digit3 = 3;
-    wire [3:0]digit4 = 4;
-    wire [3:0]digit5 = 5;
-    wire [3:0]digit6 = 6;
-    wire [3:0]digit7 = 7;
-    wire dp0    = 1;
-    wire dp1    = 0;
-    wire dp2    = 1;
-    wire dp3    = 0;
-    wire dp4    = 1;
-    wire dp5    = 0;
-    wire dp6    = 1;
-    wire dp7    = 0;
+    wire [15:0] Segment_freq   ;
+    wire [15:0] Segment_period ;
+    wire [2:0] point_1        ;
+    wire [2:0] point_2        ;
     // 小数点控制信号（示例：在小数点位置显示测量精度）
     wire dp_freq, dp_period, dp_pulse;
-    reg [2:0] sig_in_r;
+    reg [1:0] sig_in_r;
 
-    reg [2:0] mod_sel_r;                   // 按键
+    reg [1:0] mod_sel_r;                   // 按键
     always @(posedge clk) begin
         sig_in_r <= {sig_in_r,signal_in};
         mod_sel_r <= {mod_sel_r,mod_sel};
     end
+    assign Measurement_time = mod_sel_r[1] ? period_time : high_time;
     Input_Capture_Module capture_inst (
         .clk               (clk               ),
         .rst               (!rst_n            ),
-        .signal_in         (sig_in_r[2]       ),
+        .signal_in         (sig_in_r[1]       ),
         .high_time         (high_time         ),
         .low_time          (low_time          ),
         .period_time       (period_time       ),
@@ -97,17 +79,14 @@ module Top_Module (
         .clk               (clk               ),
         .rst_n             (rst_n             ),
         .measurement_done  (measurement_done_sig),
-        .period_time       (period_time       ),
+        .period_time       (Measurement_time  ),
         .Segment_freq      (Segment_freq      ),
         .Segment_period    (Segment_period    ),
         .point_1           (point_1           ),
-        .point_2           (point_2           )
+        .point_2           (point_2           ),
+        .k                 (k                 ),
+        .m                 (m                 )
     );
-
-    // 生成小数点控制信号（示例：根据具体需求设置）
-    assign dp_freq   = 1;  // 固定显示小数点
-    assign dp_period = 1;  // 固定显示小数点
-    assign dp_pulse  = 1;  // 固定显示小数点
 
     hex8_test u_hex8_test (
         .Clk         (clk               ),

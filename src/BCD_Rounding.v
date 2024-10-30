@@ -20,7 +20,7 @@ module BCD_Rounding (
     reg [3:0]   tens_out;
     reg [3:0]   units_out;
     assign {hundred_thousands_in, ten_thousands_in, thousands_in, hundreds_in, tens_in, units_in} = BCD_in;
-    assign BCD_out = {hundred_thousands_in, ten_thousands_in, thousands_in, hundreds_in, tens_in};
+    assign BCD_out = {hundred_thousands_out, ten_thousands_out, thousands_out, hundreds_out, tens_out};
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin

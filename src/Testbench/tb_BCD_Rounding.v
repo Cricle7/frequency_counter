@@ -20,24 +20,16 @@ module tb_BCD_Rounding;
     wire [3:0] tens_out;
     wire [3:0] units_out;
     wire done;
+    reg [23:0]BCD_in ;
+    wire [19:0]BCD_out;
 
     // 实例化 BCD_Rounding 模块
     BCD_Rounding uut (
         .clk(clk),
         .rst_n(rst_n),
         .start(start),
-        .hundred_thousands_in(hundred_thousands_in),
-        .ten_thousands_in(ten_thousands_in),
-        .thousands_in(thousands_in),
-        .hundreds_in(hundreds_in),
-        .tens_in(tens_in),
-        .units_in(units_in),
-        .hundred_thousands_out(hundred_thousands_out),
-        .ten_thousands_out(ten_thousands_out),
-        .thousands_out(thousands_out),
-        .hundreds_out(hundreds_out),
-        .tens_out(tens_out),
-        .units_out(units_out),
+        .BCD_in(BCD_in),
+        .BCD_out(BCD_out),
         .done(done)
     );
 
@@ -58,6 +50,7 @@ module tb_BCD_Rounding;
         #10;
 
         // 测试用例1：输入 123456，units 位小于 5，不需要进位
+        BCD_in = 24'h123456;
         hundred_thousands_in = 4'd0;
         ten_thousands_in     = 4'd1;
         thousands_in         = 4'd2;
