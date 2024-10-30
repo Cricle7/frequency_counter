@@ -2,10 +2,13 @@
 tb_Input_Capture_Module.v
 tb_Top_Module.v
 tb_Seven_Segment_Display.v
+tb_Binary_to_BCD.v
+tb_BCD_Rounding.v
 ../freq.v
 ../HC595_Driver.v
 ../top.v
 ../Binary_to_BCD.v
+../BCD_Rounding.v
 ../Seven_Segment_Display.v
 ../Pipelined_Divider.v
 ../Measurement_Processor.v

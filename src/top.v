@@ -31,6 +31,7 @@ module Top_Module (
     input wire clk,                      // 系统时钟
     input wire rst_n,                      // 复位信号，高电平有效
     input wire signal_in,                // 待测量的输入信号
+    input wire mod_sel,                   // 按键
     // 数码管输出
 //    output wire [6:0] seg_freq,          // 频率数码管段选
     //output wire [2:0] an_freq,           // 频率数码管位选
@@ -79,151 +80,112 @@ module Top_Module (
     wire dp7    = 0;
     // 小数点控制信号（示例：在小数点位置显示测量精度）
     wire dp_freq, dp_period, dp_pulse;
+    reg [2:0] sig_in_r;
 
-    // 实例化 Input_Capture_Module
+    reg [2:0] mod_sel_r;                   // 按键
+    always @(posedge clk) begin
+        sig_in_r <= {sig_in_r,signal_in};
+        mod_sel_r <= {mod_sel_r,mod_sel};
+    end
     Input_Capture_Module capture_inst (
-        .clk(clk),
-        .rst(!rst_n),
-        .signal_in(signal_in),
-        .high_time(high_time),
-        .low_time(low_time),
-        .period_time(period_time),
-        .measurement_done(measurement_done_sig)
+        .clk               (clk               ),
+        .rst               (!rst_n            ),
+        .signal_in         (sig_in_r[2]       ),
+        .high_time         (high_time         ),
+        .low_time          (low_time          ),
+        .period_time       (period_time       ),
+        .measurement_done  (measurement_done_sig)
     );
 
     // 实例化 Measurement_Processor
     Measurement_Processor # (
-        .CLOCK_FREQ(CLOCK_FREQ)
-    ) processor(
-        .clk(clk),
-        .rst(!rst_n),
-        .measurement_done(measurement_done_sig),
-        .high_time(high_time),
-        .low_time(low_time),
-        .period_time(period_time),
-        .period(period),
-        .frequency_out(frequency_out),
-        .calculation_done(calculation_done)
+        .CLOCK_FREQ        (CLOCK_FREQ        )
+    ) processor (
+        .clk               (clk               ),
+        .rst               (!rst_n            ),
+        .measurement_done  (measurement_done_sig),
+        .high_time         (high_time         ),
+        .low_time          (low_time          ),
+        .period_time       (period_time       ),
+        .period            (period            ),
+        .frequency_out     (frequency_out     ),
+        .calculation_done  (calculation_done  )
     );
 
     // 实例化 Binary_to_BCD 转换器用于频率
     Binary_to_BCD bcd_freq (
-        .clk(clk),
-        .rst(!rst_n),
-        .start(calculation_done),
-        .binary_in(frequency_out),
-        .hundreds(freq_hundreds),
-        .tens(freq_tens),
-        .units(freq_units),
-        .done(bcd_freq_done)
+        .clk               (clk               ),
+        .rst               (!rst_n            ),
+        .start             (calculation_done  ),
+        .binary_in         (frequency_out     ),
+        .hundreds          (freq_hundreds     ),
+        .tens              (freq_tens         ),
+        .units             (freq_units        ),
+        .done              (bcd_freq_done     )
     );
 
     // 实例化 Binary_to_BCD 转换器用于周期
     Binary_to_BCD bcd_period (
-        .clk(clk),
-        .rst(!rst_n),
-        .start(calculation_done),
-        .binary_in(period),
-        .hundreds(period_hundreds),
-        .tens(period_tens),
-        .units(period_units),
-        .done(bcd_period_done)
+        .clk               (clk               ),
+        .rst               (!rst_n            ),
+        .start             (calculation_done  ),
+        .binary_in         (period            ),
+        .hundreds          (period_hundreds   ),
+        .tens              (period_tens       ),
+        .units             (period_units      ),
+        .done              (bcd_period_done   )
     );
 
     // 实例化 Binary_to_BCD 转换器用于脉宽
     Binary_to_BCD bcd_pulse (
-        .clk(clk),
-        .rst(!rst_n),
-        .start(calculation_done),
-        .binary_in(high_time), // 假设脉宽为 high_time
-        .hundreds(pulse_hundreds),
-        .tens(pulse_tens),
-        .units(pulse_units),
-        .done(bcd_pulse_done)
+        .clk               (clk               ),
+        .rst               (!rst_n            ),
+        .start             (calculation_done  ),
+        .binary_in         (high_time         ), // 假设脉宽为 high_time
+        .hundreds          (pulse_hundreds    ),
+        .tens              (pulse_tens        ),
+        .units             (pulse_units       ),
+        .done              (bcd_pulse_done    )
     );
 
+    // 实例化 Seven_Segment_Display
+    Seven_Segment_Display # (
+        .CLOCK_FREQ        (CLOCK_FREQ         ),  // 示例参数，需根据实际情况调整
+        .SCAN_FREQ         (SCAN_FREQ           )
+    ) seven_seg_display (
+        .clk               (clk               ),
+        .rst_n             (rst_n             ),
+
+        // 连接 Binary_to_BCD 输出
+        .freq_hundreds     (freq_hundreds     ),
+        .freq_tens         (freq_tens         ),
+        .freq_units        (freq_units        ),
+
+        .period_hundreds   (period_hundreds   ),
+        .period_tens       (period_tens       ),
+        .period_units      (period_units      ),
+
+        .pulse_hundreds    (pulse_hundreds    ),
+        .pulse_tens        (pulse_tens        ),
+        .pulse_units       (pulse_units       ),
+
+        // 连接到 hex8_test 的显示数据
+        .Disp_Data         (Disp_Data         )
+    );
     // 生成小数点控制信号（示例：根据具体需求设置）
-    assign dp_freq = 1;    // 固定显示小数点
+    assign dp_freq   = 1;  // 固定显示小数点
     assign dp_period = 1;  // 固定显示小数点
-    assign dp_pulse = 1;   // 固定显示小数点
+    assign dp_pulse  = 1;  // 固定显示小数点
 
-//    Seven_Segment_Display #(
-        //.CLOCK_FREQ(CLOCK_FREQ),
-        //.SCAN_FREQ(SCAN_FREQ)
-    //) uut (
-        //.clk(clk),
-        //.rst(!rst_n),
-        //.digit0(digit0),
-        //.digit1(digit1),
-        //.digit2(digit2),
-        //.digit3(digit3),
-        //.digit4(digit4),
-        //.digit5(digit5),
-        //.digit6(digit6),
-        //.digit7(digit7),
-        //.dp0(dp0),
-        //.dp1(dp1),
-        //.dp2(dp2),
-        //.dp3(dp3),
-        //.dp4(dp4),
-        //.dp5(dp5),
-        //.dp6(dp6),
-        //.dp7(dp7),
-        //.dio(dio),
-        //.rclk(rclk),
-        //.sclk(sclk)
-    //);
-
-    hex8_test u_hex8_test(
-        .Clk(clk),
-        .Reset_n(rst_n),
-        .point_1(0),
-        .point_2(0),
-        .Disp_Data(32'h13579bdf),
-        .SH_CP(sclk),
-        .ST_CP(rclk),
-        .DS(dio)
-    ); 
-    // 实例化 Seven_Segment_Display 用于频率
-//    Seven_Segment_Display display_freq (
-        //.clk(clk),
-        //.rst(rst),
-        //.hundreds(freq_hundreds),
-        //.tens(freq_tens),
-        //.units(freq_units),
-        //.dp_hundreds(dp_freq),
-        //.dp_tens(dp_freq),
-        //.dp_units(dp_freq),
-        //.seg(seg_freq),
-        //.an(an_freq)
-    //);
-
-    //// 实例化 Seven_Segment_Display 用于周期
-    //Seven_Segment_Display display_period (
-        //.clk(clk),
-        //.rst(rst),
-        //.hundreds(period_hundreds),
-        //.tens(period_tens),
-        //.units(period_units),
-        //.dp_hundreds(dp_period),
-        //.dp_tens(dp_period),
-        //.dp_units(dp_period),
-        //.seg(seg_period),
-        //.an(an_period)
-    //);
-
-    //// 实例化 Seven_Segment_Display 用于脉宽
-    //Seven_Segment_Display display_pulse (
-        //.clk(clk),
-        //.rst(rst),
-        //.hundreds(pulse_hundreds),
-        //.tens(pulse_tens),
-        //.units(pulse_units),
-        //.dp_hundreds(dp_pulse),
-        //.dp_tens(dp_pulse),
-        //.dp_units(dp_pulse),
-        //.seg(seg_pulse),
-        //.an(an_pulse)
-    //);
+    hex8_test u_hex8_test (
+        .Clk         (clk               ),
+        .Reset_n     (rst_n             ),
+        .point_1     (1                 ),
+        .point_2     (2                 ),
+        .Disp_Data   (32'h13579bdf      ),
+        .SH_CP       (sclk              ),
+        .ST_CP       (rclk              ),
+        .DS          (dio               )
+    );
 
 endmodule

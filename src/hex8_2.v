@@ -16,8 +16,8 @@ module hex8_2(
     
     reg clk_1k;
     reg [15:0]div_cnt;
-    input [3:0]point_1;
-    input [3:0]point_2;
+    input [2:0]point_1;
+    input [2:0]point_2;
     always@(posedge Clk or negedge Reset_n)
     if(!Reset_n)
         div_cnt <= 0;
@@ -68,27 +68,26 @@ module hex8_2(
 
      always@(posedge Clk)
         case(disp_tmp)
-            0: SEG[6:0] = 7'hc0;
-            1: SEG[6:0] = 7'hf9;
-            2: SEG[6:0] = 7'ha4;
-            3: SEG[6:0] = 7'hb0;
-            4: SEG[6:0] = 7'h99;
-            5: SEG[6:0] = 7'h92;
-            6: SEG[6:0] = 7'h82;
-            7: SEG[6:0] = 7'hf8;
-            8: SEG[6:0] = 7'h80;
-            9: SEG[6:0] = 7'h90;
-            4'ha: SEG[6:0] = 7'h88;
-            4'hb: SEG[6:0] = 7'h83;
-            4'hc: SEG[6:0] = 7'hc6;
-            4'hd: SEG[6:0] = 7'ha1;
-            4'he: SEG[6:0] = 7'h86;
-            4'hf: SEG[6:0] = 7'h8e;
+            0: SEG[6:0] = 7'h40;
+            1: SEG[6:0] = 7'h79;
+            2: SEG[6:0] = 7'h24;
+            3: SEG[6:0] = 7'h30;
+            4: SEG[6:0] = 7'h19;
+            5: SEG[6:0] = 7'h12;
+            6: SEG[6:0] = 7'h02;
+            7: SEG[6:0] = 7'h78;
+            8: SEG[6:0] = 7'h00;
+            9: SEG[6:0] = 7'h10;
+            4'ha: SEG[6:0] = 7'h08;
+            4'hb: SEG[6:0] = 7'h03;
+            4'hc: SEG[6:0] = 7'h46;
+            4'hd: SEG[6:0] = 7'h21;
+            4'he: SEG[6:0] = 7'h06;
+            4'hf: SEG[6:0] = 7'h0e;
         endcase   
+    wire ed = (num_cnt == point_1 || num_cnt == point_2 + 4) ? 1 : 0;
     always @(posedge Clk) begin
-        if (num_cnt == point_1) begin
-            SEG[7] <= 1'b0;
-        end if (num_cnt == point_2 + 4) begin
+        if (ed) begin
             SEG[7] <= 1'b0;
         end else begin
             SEG[7] <= 1'b1;

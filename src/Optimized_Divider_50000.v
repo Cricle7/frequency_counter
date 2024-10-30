@@ -5,18 +5,18 @@ module Pipelined_Optimized_Divider_5000 (
     output  reg [31:0]  quotient        // 商
 );
     // 预计算的倒数乘以 2^32
-    localparam RECIPROCAL = 32'd858993; // 1 / 5000 * 2^32 ≈ 858,993
-    
+    localparam RECIPROCAL = 32'd1717987; // 1 / 5,000 * 2^32 ≈ 1717986.9184
+
     reg [31:0] numerator_reg;
     reg [31:0] reciprocal_reg;
     reg [63:0] product_reg;
     reg        is_zero_reg;
-    
+
     wire is_zero;
-    
+
     // 检测被除数是否为零
     assign is_zero = (numerator == 32'd0);
-    
+
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             numerator_reg  <= 32'd0;
@@ -29,10 +29,10 @@ module Pipelined_Optimized_Divider_5000 (
             numerator_reg  <= numerator;
             reciprocal_reg <= RECIPROCAL;
             is_zero_reg    <= is_zero;
-    
+
             // 流水线阶段2：乘法
-            product_reg <= numerator_reg * reciprocal_reg;
-    
+            product_reg <= (numerator_reg * reciprocal_reg);
+
             // 流水线阶段3：输出商
             if (is_zero_reg)
                 quotient <= 32'd0;

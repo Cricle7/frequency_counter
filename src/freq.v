@@ -116,18 +116,10 @@ module Input_Capture_Module (
             end
             MEASURE_LOW: begin
                 if (rising_edge) begin
-                    next_state = COUNT_PERIOD;
-                end
-                else begin
-                    next_state = MEASURE_LOW;
-                end
-            end
-            COUNT_PERIOD: begin
-                if (rising_edge) begin
                     next_state = MEASURE_HIGH;
                 end
                 else begin
-                    next_state = COUNT_PERIOD;
+                    next_state = MEASURE_LOW;
                 end
             end
             default: next_state = IDLE;
@@ -180,16 +172,9 @@ module Input_Capture_Module (
                 counter <= counter + 1;
                 if (rising_edge) begin
                     low_time <= low_count;
-                end
-            end
-            else if (current_state == COUNT_PERIOD) begin
-                if (rising_edge) begin
                     period_count <= counter;
                     measurement_done <= 1;
                     counter <= 0;
-                end
-                else begin
-                    counter <= counter + 1;
                 end
             end
         end

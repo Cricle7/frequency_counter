@@ -1,8 +1,8 @@
 module hex8_test(
     input Clk,
     input Reset_n,
-    input [3:0]point_1,
-    input [3:0]point_2,
+    input [2:0]point_1,
+    input [2:0]point_2,
 
     input [31:0]Disp_Data,
     

@@ -13,6 +13,7 @@ module tb_Input_Capture_Module;
     wire [31:0] frequency;
     wire [31:0] high_time;
     wire [31:0] low_time;
+    wire [31:0] period_time;
     wire measurement_done;
 
     // 实例化被测模块
@@ -20,9 +21,9 @@ module tb_Input_Capture_Module;
         .clk(clk),
         .rst(rst),
         .signal_in(signal_in),
-        .frequency(frequency),
         .high_time(high_time),
         .low_time(low_time),
+        .period_time(period_time),
         .measurement_done(measurement_done)
     );
 
