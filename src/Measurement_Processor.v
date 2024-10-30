@@ -2,149 +2,152 @@ module Measurement_Processor #(
     parameter CLOCK_FREQ = 50000000
 )(
     input wire clk, // 系统时钟
-    input wire rst, // 复位信号，高电平有效
+    input wire rst_n, // 复位信号，高电平有效
     input wire measurement_done, // 测量完成信号
-    input wire [31:0] high_time, // 高电平持续时间
-    input wire [31:0] low_time, // 低电平持续时间
     input wire [31:0] period_time, // 信号周期 (秒)
-    output reg [31:0] period, // 信号周期 (秒)
-    output reg [31:0] frequency_out, // 计算得到的频率 (Hz)
-    output reg calculation_done // 计算完成信号
+    output reg [15:0]Segment_freq,
+    output reg [15:0]Segment_period,
+    output reg [2:0]point_1,//频率小数点
+    output reg [2:0]point_2,//周期小数点
+    output reg k,//频率单位
+    output reg m//周期
 );
+    // 内部信号定义
+    wire                   divider_done;             // 频率除法完成信号
+    wire [31:0]            frequency_quotient;      // 频率除法商
 
-    // 内部信号
-    reg [31:0] period_reg;
-    reg [31:0] divider_dividend;
-    reg [31:0] divider_divisor;
-    reg divider_start;
-    wire [31:0] divider_quotient;
-    wire divider_ready;
+    wire                   bcd_freq_done;            // 频率BCD转换完成信号
+    wire [23:0]            freq_bcd;                // 频率的BCD表示
+    wire [19:0]            freq_bcd_rounded;        // 频率BCD四舍五入后
+    wire [31:0]            period_out;              // 周期除法商
 
-    // 实例化一个 Pipelined_Divider
-    Pipelined_Divider divider_inst (
-        .clk(clk),
-        .rst(rst),
-        .start(divider_start),
-        .dividend(divider_dividend),
-        .divisor(divider_divisor),
-        .quotient(divider_quotient),
-        .ready(divider_ready)
+    wire                   bcd_period_done;          // 周期BCD转换完成信号
+    wire [23:0]            period_bcd;              // 周期的BCD表示
+    wire [19:0]            period_bcd_rounded;      // 周期BCD四舍五入后
+    wire                   bcd_freq_round_done;     // 频率BCD四舍五入完成信号
+    wire                   bcd_period_round_done;   // 周期BCD四舍五入完成信号
+
+    // 频率计算模块实例化
+    Iterative_Divider divide_freq (
+        .clk        (clk),
+        .rst_n      (rst_n),
+        .start      (measurement_done),
+        .numerator  (32'd5000),                // 分子
+        .divisor    (period_time),             // 分母
+        .quotient   (frequency_quotient),      // 商
+        .done       (divider_done)             // 完成信号
     );
 
-    // 状态机定义
-    reg [2:0] current_state, next_state;
-    localparam IDLE       = 3'd0;
-    localparam LOAD       = 3'd1;
-    localparam CALC_FREQ  = 3'd2;
-    localparam WAIT_FREQ  = 3'd3;
-    localparam CALC_PER   = 3'd4;
-    localparam WAIT_PER   = 3'd5;
-    localparam OUTPUT     = 3'd6;
+    // 频率二进制转BCD模块实例化
+    Binary_to_BCD bcd_freq_inst (
+        .clk        (clk),
+        .rst_n      (rst_n),
+        .start      (divider_done),
+        .binary_in  (frequency_quotient),
+        .bcd        (freq_bcd),
+        .done       (bcd_freq_done)
+    );
 
-    // 状态转移
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
-            current_state <= IDLE;
-        end else begin
-            current_state <= next_state;
-        end
-    end
+    // 频率BCD四舍五入模块实例化
+    BCD_Rounding bcd_freq_round_inst (
+        .clk        (clk),
+        .rst_n      (rst_n),
+        .start      (bcd_freq_done),
+        .BCD_in     (freq_bcd),
+        .BCD_out    (freq_bcd_rounded),
+        .done       (bcd_freq_round_done)
+    );
 
-    // 状态机逻辑
+    // 周期计算模块实例化
+    Pipelined_Optimized_Divider_5000 divide_period (
+        .clk        (clk),
+        .rst_n      (rst_n),
+        .numerator  (period_time),              // 被除数
+        .quotient   (period_out)               // 商
+    );
+
+    // 周期二进制转BCD模块实例化
+    Binary_to_BCD bcd_period_inst (
+        .clk        (clk),
+        .rst_n      (rst_n),
+        .start      (1),     // 周期除法完成信号
+        .binary_in  (period_out),
+        .bcd        (period_bcd),
+        .done       (bcd_period_done)
+    );
+
+    // 周期BCD四舍五入模块实例化
+    BCD_Rounding bcd_period_round_inst (
+        .clk        (clk),
+        .rst_n      (rst_n),
+        .start      (bcd_period_done),
+        .BCD_in     (period_bcd),
+        .BCD_out    (period_bcd_rounded),
+        .done       (bcd_period_round_done)
+    );
+
+    
+    wire freq_ten_tho_0 =(freq_bcd_rounded[19:16] == 0) ;
+    wire freq_tho_0 =(freq_bcd_rounded[15:12] == 0) ;
+    wire freq_hund_0 =(freq_bcd_rounded[11:8] == 0) ;
+    wire freq_tens_0 =(freq_bcd_rounded[7:4] == 0) ;
+
     always @(*) begin
-        case (current_state)
-            IDLE: begin
-                if (measurement_done) begin
-                    next_state = LOAD;
-                end else begin
-                    next_state = IDLE;
-                end
+        Segment_freq = freq_bcd_rounded[19:4];
+        point_1     = 2;
+        k = 1'b1;
+        casez ({freq_ten_tho_0, freq_tho_0, freq_hund_0, freq_tens_0})
+            4'b1111: begin
+                Segment_freq = freq_bcd_rounded[15:0];
+                point_1     = 1'b0;
+                k = 1'b0;
             end
-            LOAD: begin
-                next_state = CALC_FREQ;
+            4'b111?: begin
+                Segment_freq = freq_bcd_rounded[15:4];
+                point_1     = 1'b0;
+                k = 1'b0;
             end
-            CALC_FREQ: begin
-                next_state = WAIT_FREQ;
+            4'b11??: begin
+                Segment_freq = freq_bcd_rounded[15:4];
+                point_1     = 1'b0;
+                k = 1'b0;
             end
-            WAIT_FREQ: begin
-                if (divider_ready) begin
-                    next_state = CALC_PER;
-                end else begin
-                    next_state = WAIT_FREQ;
-                end
+            4'b1???: begin
+                Segment_freq = freq_bcd_rounded[15:4];
+                point_1     = 3;
             end
-            CALC_PER: begin
-                next_state = WAIT_PER;
-            end
-            WAIT_PER: begin
-                if (divider_ready) begin
-                    next_state = OUTPUT;
-                end else begin
-                    next_state = WAIT_PER;
-                end
-            end
-            OUTPUT: begin
-                next_state = IDLE;
-            end
-            default: next_state = IDLE;
         endcase
     end
 
-    // 控制信号和输出逻辑
-    reg [31:0] frequency_temp; // 暂存频率计算结果
+    wire period_ten_tho_0 =(period_bcd_rounded[19:16] == 0) ;
+    wire period_tho_0 =(period_bcd_rounded[15:12] == 0) ;
+    wire period_hund_0 =(period_bcd_rounded[11:8] == 0) ;
+    wire period_tens_0 =(period_bcd_rounded[7:4] == 0) ;
 
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
-            period <= 0;
-            frequency_out <= 0;
-            calculation_done <= 0;
-            divider_start <= 0;
-            divider_dividend <= 0;
-            divider_divisor <= 0;
-            period_reg <= 0;
-            frequency_temp <= 0;
-        end else begin
-            calculation_done <= 0; // 每个时钟周期复位计算完成信号
-            divider_start <= 0;    // 默认不启动除法器
-
-            case (current_state)
-                IDLE: begin
-                    // 等待 measurement_done 信号
-                end
-                LOAD: begin
-                    // 计算周期时间
-                    period_reg <= high_time + low_time;
-                end
-                CALC_FREQ: begin
-                    // 准备第一个除法操作：计算频率
-                    divider_dividend <= CLOCK_FREQ;     // 被除数：时钟频率
-                    divider_divisor <= period_reg;      // 除数：信号周期时间
-                    divider_start <= 1;                 // 启动除法器
-                end
-                WAIT_FREQ: begin
-                    // 等待除法器完成计算
-                    if (divider_ready) begin
-                        frequency_temp <= divider_quotient; // 保存频率计算结果
-                    end
-                end
-                CALC_PER: begin
-                    // 准备第二个除法操作：计算周期
-                    divider_dividend <= period_reg;     // 被除数：信号周期时间
-                    divider_divisor <= CLOCK_FREQ;      // 除数：时钟频率
-                    divider_start <= 1;                 // 启动除法器
-                end
-                WAIT_PER: begin
-                    // 等待除法器完成计算
-                    if (divider_ready) begin
-                        period <= divider_quotient;     // 获取周期计算结果
-                    end
-                end
-                OUTPUT: begin
-                    frequency_out <= frequency_temp;    // 输出频率结果
-                    calculation_done <= 1;              // 设置计算完成信号
-                end
-                default: ;
-            endcase
-        end
+    always @(*) begin
+        Segment_period = period_bcd_rounded[19:4];
+        point_2     = 2;
+        k = 1'b1;
+        casez ({period_ten_tho_0, period_tho_0, period_hund_0, period_tens_0})
+            4'b1111: begin
+                Segment_period = period_bcd_rounded[15:0];
+                point_2     = 1'b0;
+                k = 1'b0;
+            end
+            4'b111?: begin
+                Segment_period = period_bcd_rounded[15:4];
+                point_2     = 1'b0;
+                k = 1'b0;
+            end
+            4'b11??: begin
+                Segment_period = period_bcd_rounded[15:4];
+                point_2     = 1'b0;
+                k = 1'b0;
+            end
+            4'b1???: begin
+                Segment_period = period_bcd_rounded[15:4];
+                point_2     = 3;
+            end
+        endcase
     end
 endmodule

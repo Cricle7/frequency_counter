@@ -2,21 +2,25 @@ module BCD_Rounding (
     input               clk,
     input               rst_n,
     input               start,
-    input       [3:0]   hundred_thousands_in,
-    input       [3:0]   ten_thousands_in,
-    input       [3:0]   thousands_in,
-    input       [3:0]   hundreds_in,
-    input       [3:0]   tens_in,
-    input       [3:0]   units_in,
-    output  reg [3:0]   hundred_thousands_out,
-    output  reg [3:0]   ten_thousands_out,
-    output  reg [3:0]   thousands_out,
-    output  reg [3:0]   hundreds_out,
-    output  reg [3:0]   tens_out,
-    output  reg [3:0]   units_out,
+    input   [23:0]  BCD_in,
+    input   [19:0]  BCD_out,
     output  reg         done
 );
     reg                 processing;
+    wire   [3:0]   hundred_thousands_in;
+    wire   [3:0]   ten_thousands_in;
+    wire   [3:0]   thousands_in;
+    wire   [3:0]   hundreds_in;
+    wire   [3:0]   tens_in;
+    wire   [3:0]   units_in;
+    reg [3:0]   hundred_thousands_out;
+    reg [3:0]   ten_thousands_out;
+    reg [3:0]   thousands_out;
+    reg [3:0]   hundreds_out;
+    reg [3:0]   tens_out;
+    reg [3:0]   units_out;
+    assign {hundred_thousands_in, ten_thousands_in, thousands_in, hundreds_in, tens_in, units_in} = BCD_in;
+    assign BCD_out = {hundred_thousands_in, ten_thousands_in, thousands_in, hundreds_in, tens_in};
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin

@@ -4,6 +4,7 @@ tb_Top_Module.v
 tb_Seven_Segment_Display.v
 tb_Binary_to_BCD.v
 tb_BCD_Rounding.v
+tb_Iterative_Divider.v
 ../freq.v
 ../HC595_Driver.v
 ../top.v
@@ -14,3 +15,4 @@ tb_BCD_Rounding.v
 ../Measurement_Processor.v
 ../hex8_2.v
 ../hex8_test.v
+../Interative_Divider.v

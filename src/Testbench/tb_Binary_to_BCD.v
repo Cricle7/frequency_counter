@@ -7,7 +7,7 @@ module tb_Binary_to_BCD;
     reg start;
     reg [31:0] binary_in;
 
-    wire [27:0] bcd;
+    wire [23:0] bcd;
     wire done;
 
     // 实例化 Binary_to_BCD 模块
@@ -37,7 +37,7 @@ module tb_Binary_to_BCD;
         #10;
 
         // 测试用例1：输入123456
-        binary_in = 32'd12345;
+        binary_in = 32'd999999;
         start = 1;
         #10;
         start = 0;
