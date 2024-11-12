@@ -5,7 +5,21 @@
 本课程设计报告围绕数字频率计展开。数字频率计作为一种重要的电子测量仪器，在电子工程等领域具有广泛的应用。本次课程设计详细阐述了数字频率计的设计原理、实现方法及测试过程。通过对电路的精心设计和调试，实现了对输入信号频率的准确测量。该数字频率计具有测量精度高、稳定性好、操作简便等特点。在设计过程中，充分运用了数字电路的相关知识，包括计数器、寄存器、译码器等逻辑器件的应用。经过实际测试，该数字频率计能够准确地测量不同频率范围内的信号，满足了课程设计的要求，为电子测量技术的学习和实践提供了有益的参考。
 本文设计了一种创新的数字频率计，采用输入捕获方法代替传统的等效采样方法进行频率测量。相比等效采样法，输入捕获法在精度和测量范围方面具有显著优势。该方法不仅提高了频率计的测量准确度，还能够在更广的频率范围内稳定运行，实现高达0.5%以内的测量误差。通过输入捕获技术，本设计满足了高精度测量的要求，且在整个设计频率范围内无需频段切换，极大地简化了系统结构并提升了操作便捷性。
 由于本次设计采用了输入捕获的方法和流水线设计，实现了从测量到输出结果为微秒级延迟。相比于传统的等效测量法对于部分频率的测量需要 10 秒的情况，这是一个极大的提升。这种创新的设计不仅提高了测量的速度，还增强了系统的实时性和响应能力，能够更好地满足现代电子测量领域对于快速、准确测量的需求。同时，流水线设计也提高了系统的处理效率，使得多个测量任务可以同时进行，进一步提升了系统的性能。
+### Abstract
 
+This course project focuses on the development of a digital frequency meter, a crucial electronic measurement instrument with extensive applications in the field of electronic engineering. The report provides a comprehensive exposition of the design principles, implementation methodologies, and testing procedures employed in creating the digital frequency meter. Through meticulous circuit design and debugging, the frequency meter successfully achieves accurate measurement of input signal frequencies, exhibiting high precision, excellent stability, and user-friendly operation.
+
+The design leverages fundamental digital circuit concepts, including the utilization of counters, registers, and decoders, to facilitate reliable frequency measurement. Empirical testing validates the device's ability to accurately measure signals across a broad range of frequencies, thereby fulfilling the course project requirements and offering valuable insights for both academic study and practical application in electronic measurement technologies.
+
+A notable innovation in this design is the adoption of the input capture method in place of the traditional equivalent sampling technique for frequency measurement. Compared to equivalent sampling, the input capture approach offers significant advantages in terms of precision and measurement range. This method not only enhances the accuracy of frequency measurements but also ensures stable operation over a wider frequency spectrum, achieving measurement errors within 0.5%. Additionally, the input capture technique eliminates the need for frequency band switching, thereby simplifying the system architecture and improving operational convenience.
+
+Furthermore, the incorporation of a pipelined design enables the system to process measurements with microsecond-level delays from acquisition to output. This represents a substantial improvement over conventional equivalent measurement methods, which may require up to 10 seconds for certain frequency measurements. The innovative design not only accelerates measurement speed but also enhances the system's real-time responsiveness and operational efficiency, making it well-suited to meet the demands of modern electronic measurement applications that require rapid and precise data acquisition. The pipelined architecture also boosts processing efficiency, allowing multiple measurement tasks to be conducted concurrently and thereby further enhancing overall system performance.
+
+In conclusion, the developed digital frequency meter demonstrates robust performance characteristics, including high measurement accuracy, stability, and efficiency. The successful integration of input capture and pipelined design methodologies ensures that the system operates reliably within the specified frequency ranges, providing a valuable tool for electronic measurements and serving as an effective reference for future advancements in the field.
+
+## Keywords
+
+Digital Frequency Meter, FPGA, Input Capture, Pipelined Design, Frequency Measurement, Digital Circuits, Electronic Engineering, Measurement Accuracy, System Stability
 ### **第一章 技术指标**
 
 #### **1.1 系统的功能要求**
